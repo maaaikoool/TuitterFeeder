@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tuitter Feeder</title>
+<meta name="description" content="Twitter Feeder">
+<meta name="author" content="SitePoint">
+<link rel="stylesheet" href="css/bootstrap.min.css?v=1.0">
+</head>
+
+<style type="text/css">
+table,td,th {
+	width: 700px;
+	border-collapse: collapse;
+	border: 1px black solid;
+}
+</style>
+
+<script src="http://code.jquery.com/jquery-latest.min.js"
+	type="text/javascript"></script>
+<script src="js/jquery.gracefulWebSocket.js" type="text/javascript"></script>
+<script src="js/wsclient.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+<script src="js/favs.js" type="text/javascript"></script>
+<script src="js/printTuit.js" type="text/javascript"></script>
+
+<nav></nav>
+<!-- End Navigation -->
+<!-- Main content area -->
+<section>
+
+<br><br>
+
+<div class="row" style="text-align:center">
+		<input type="text" class="input-medium search-query" id="filter">
+		<button class="btn" id="buttonSC" onclick="wsclient.connect()">Start</button>
+		<button class="btn" id="favoritos" onclick="listFavoritos()">Favoritos</button>
+</div>
+
+<br>
+
+<div id=content class="container">
+
+	
+	
+</div> <!-- end container -->
+</section>
+<!-- End of Main content area -->
+<!-- Sidebar -->
+<aside>
+	<!-- Sidebar 
+	<section>
+		<ul>
+			<li>tuit1</li>
+			<li>tuit2</li>
+		</ul>
+	</section>
+	-->
+</aside>
+<!-- End Sidebar -->
+<!-- Footer -->
+<footer></footer>
+<!-- End of Footer -->
+</body>
+</html>
+
+
+
+
+
+
