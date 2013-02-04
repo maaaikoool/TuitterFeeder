@@ -30,7 +30,6 @@ public class StatusListenerWebSocket extends StatusAdapter {
 		String tweet = DataObjectFactory.getRawJSON(status);
 		DBObject tuitDB = (DBObject) JSON.parse(tweet);
 		tuitDB.put("filter", filter);
-//		tuitDB.put("filterBy", user); TODO
 
 		try {
 			MongoDao.getInstance().saveTuitToDB(tuitDB); 

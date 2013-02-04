@@ -22,7 +22,7 @@ public class StreamConnection extends MessageInbound {
 
 	private String filter;
 	private static final String pFiltro = "filter";
-	private static TwitterStream twitter;
+	private TwitterStream twitter;
 	private final String OAuthConsumerKey = "391LQjJbx84o2Je2Zx9YA";
 	private final String OAuthConsumerSecret = "BYf3UdA9EwpV8K4qmjEyZHAaZVIJZlH5qciNaMg";
 
@@ -50,7 +50,6 @@ public class StreamConnection extends MessageInbound {
 	@Override
 	protected void onOpen(WsOutbound outbound) {
 
-		System.out.println("onOpen");
 		StatusListenerWebSocket statusR = new StatusListenerWebSocket(outbound, filter);
 		twitter.addListener(statusR);
 		FilterQuery query = new FilterQuery();
@@ -60,9 +59,8 @@ public class StreamConnection extends MessageInbound {
 
 	@Override
 	protected void onClose(int status) {
-		System.out.println("onClose");
 		twitter.cleanUp();
-		twitter.shutdown();
+//		twitter.shutdown();
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 function printTuit(json, favorito) {
 			
+	console.log("printTuit");
 	var row = $(document.createElement('div')).addClass('row-fluid');
 	var pic =  $(document.createElement('img')).attr('src',json.user.profile_image_url);
 	var div0 = $(document.createElement('div')).addClass('span1').addClass('thumbnail').append(pic);

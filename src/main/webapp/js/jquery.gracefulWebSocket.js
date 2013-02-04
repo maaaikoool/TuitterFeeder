@@ -63,10 +63,10 @@
 			function FallbackSocket() {
 				
 				// WebSocket interface constants
-				const CONNECTING = 0;
-				const OPEN = 1;
-				const CLOSING = 2;
-				const CLOSED = 3;
+				CONNECTING = 0;
+				OPEN = 1;
+				CLOSING = 2;
+				CLOSED = 3;
 				
 				var pollInterval;
 				var openTimout;
@@ -157,6 +157,7 @@
 			
 			// create a new websocket or fallback
 			var ws = window.WebSocket ? new WebSocket(url) : new FallbackSocket();
+//			var ws =  new FallbackSocket();
 	 		$(window).unload(function () { ws.close(); ws = null });
 			return ws;
 		}

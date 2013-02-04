@@ -4,20 +4,39 @@ var wsclient = (function() {
 
 	function connect() {
 
-		var wsURI = 'ws://' + location.host + '/TuitterFeeder/tuit?filter=' + document.getElementById('filter').value;
-		ws = $.gracefulWebSocket(wsURI);
+		var options = { 
+				fallbackSendURL : 'http://' + location.host + '/TuitterFeeder/tuitfallback',
+				fallbackPollURL : 'http://' + location.host + '/TuitterFeeder/tuitfallback'
+				
+		};
+		var wsURI = 'ws://' + location.host + '/TuitterFeeder/tuit?filter=' + $("#filter").val()
+				+ '&user='+ $("#username").val()+"'";
+		ws = $.gracefulWebSocket(wsURI,options);
 		
 
 		ws.onopen = function() {
 			$("#buttonSC").attr('onclick', 'wsclient.disconnect()');
 			$("#buttonSC").html('Stop');
+			
+			var opt = {}
+			opt.user = $("#username").val();
+			opt.filter =  $("#filter").val();
+			ws.send(opt);
 		};
 		ws.onmessage = function(evt) {
-			writeToScreen(evt.data);
+			
+			console.log("on message "+evt.data);
+			if(evt.data.length > 0)
+			{
+				writeToScreen(evt.data);
+			}
 		};
 
 		ws.onclose = function() {
-			
+			var opt = {}
+			opt.user = $("#username").val();
+			opt.stop = "true";
+			ws.send(opt);
 		    $("#buttonSC").attr('onclick', 'wsclient.connect()');
 			$("#buttonSC").html('Start');
 		};
@@ -27,10 +46,23 @@ var wsclient = (function() {
 		};
 
 		function writeToScreen(message) {
-			var n=message.search('"id_str":"')+10;
-			var id = message.substring(n,n+18);
+			
 			var jsonResp = $.parseJSON(message);
-			printTuit(jsonResp,false);
+			
+			if(jsonResp.id_str != undefined) // Es un tuit (1 json)
+			{
+				printTuit(jsonResp,false);
+			}
+			
+			else // es un array de tuits
+			{
+				$.each(jsonResp, function(key, val) {
+					console.log(jsonResp)
+					var aux = $.parseJSON(jsonResp[key]);
+					printTuit(aux,false);
+				});
+			}
+			
 		}
 
 	}

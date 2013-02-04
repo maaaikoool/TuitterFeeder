@@ -10,7 +10,6 @@ import org.apache.catalina.websocket.WebSocketServlet;
 public class StreamWebSocketServlet extends WebSocketServlet {
 
 	private static final long serialVersionUID = 3695910334826723009L;
-
 	@Override
 	protected StreamInbound createWebSocketInbound(String arg0,
 			HttpServletRequest request) {

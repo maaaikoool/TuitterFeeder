@@ -128,8 +128,6 @@ public class MongoDao {
 		DBObject nuevo = null;
 		if (cursor.hasNext()) {
 			nuevo = cursor.next();
-			System.out.println(nuevo);
-
 		} else {
 			throw new DaoException("no encontrado " + id);
 		}
@@ -185,8 +183,7 @@ public class MongoDao {
 		DBCollection col = db.getCollection(collectionTuit);
 		BasicDBObject query = new BasicDBObject("filterBy", user);
 		query.put("created_at", new BasicDBObject("$gt", timeStamp));
-
-		System.out.println(query);
+		
 		DBCursor cursor = col.find(query);
 		List<String> res = new ArrayList<>();
 		while (cursor.hasNext()) {
@@ -195,6 +192,7 @@ public class MongoDao {
 		}
 		JSONArray jArray = new JSONArray(res);
 		return jArray.toString();
+		
 	}
 
 }
