@@ -22,6 +22,7 @@
 <script src="js/bootstrap.min.js" type="text/javascript"></script>
 <script src="js/favs.js" type="text/javascript"></script>
 <script src="js/printTuit.js" type="text/javascript"></script>
+<script src="js/buttonGo.js" type="text/javascript"></script>
 
 <nav></nav>
 <!-- End Navigation -->
@@ -44,14 +45,14 @@
 		
 		<div class="row" style="text-align:center">
 			<input type="text" class="input-medium search-query" id="filter">
-			<button class="btn btn-success" id="buttonSC" onclick="wsclient.connect()">Start</button>
+			<button class="btn btn-success" id="buttonSC" onclick="buttonGo.go()">Start</button>
 
 			<div class="btn-group">
 			  <a class="btn btn-primary" href="#"><i class="icon-user icon-white"></i><%=at.getScreenName()%></a>
 			  <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
 			  <ul class="dropdown-menu">
 			    <li><a onclick="listFavoritos()"><i class="icon-thumbs-up"></i>Favoritos</a></li>
-			    <li><a href='logout'><i class="icon-pencil"></i>Logout</a></li>
+			    <li><a href='logout'><i class="icon-off"></i>Logout</a></li>
 			  </ul>
 			</div>
 		</div>
@@ -75,7 +76,13 @@
 <script type="text/javascript">
 $('#filter').change(function() {
 	$('#content').empty();
-	});
+});
+
+$("#filter").keypress(function(event) {
+	  if ( event.which == 13 ) {
+		  buttonGo.go()
+	   }
+});
 </script>
 
 </section>

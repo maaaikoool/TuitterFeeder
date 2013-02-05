@@ -17,10 +17,6 @@ var wsclient = (function() {
 		
 
 		ws.onopen = function() {
-			$("#buttonSC").attr('onclick', 'wsclient.disconnect()');
-			$("#buttonSC").html('Stop');
-			$("#buttonSC").toggleClass("btn-danger btn-success");
-			$("#filter").prop('disabled', true);
 			
 			var opt = {}
 			opt.user = $("#username").val();
@@ -36,11 +32,6 @@ var wsclient = (function() {
 
 		ws.onclose = function() {
 
-		    $("#buttonSC").attr('onclick', 'wsclient.connect()');
-			$("#buttonSC").html('Start');
-			$("#buttonSC").toggleClass("btn-success btn-danger");
-			$("#filter").prop('disabled', false);
-			
 			var opt = {}
 			opt.user = $("#username").val();
 			opt.stop = "true";
@@ -70,7 +61,6 @@ var wsclient = (function() {
 					printTuit(aux);
 				});
 			}
-			
 		}
 
 	}

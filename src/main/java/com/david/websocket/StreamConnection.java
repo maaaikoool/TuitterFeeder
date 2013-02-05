@@ -30,8 +30,8 @@ public class StreamConnection extends MessageInbound {
 	private String filter;
 	private static final String pFiltro = "filter";
 	private TwitterStream twitter;
-	private final String OAuthConsumerKey = "391LQjJbx84o2Je2Zx9YA";
-	private final String OAuthConsumerSecret = "BYf3UdA9EwpV8K4qmjEyZHAaZVIJZlH5qciNaMg";
+	private final static String OAuthConsumerKey = "391LQjJbx84o2Je2Zx9YA";
+	private final static String OAuthConsumerSecret = "BYf3UdA9EwpV8K4qmjEyZHAaZVIJZlH5qciNaMg";
 
 	public StreamConnection(HttpServletRequest request) {
 		this.filter = request.getParameter(pFiltro);

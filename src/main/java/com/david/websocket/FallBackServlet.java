@@ -2,7 +2,6 @@ package com.david.websocket;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,14 +26,14 @@ import com.david.dao.DaoException;
 import com.david.dao.MongoDao;
 
 /**
- * @author david.sanchez
- * Servlet que implementa el fallback de websockets con AJAX polling
+ * @author david.sanchez Servlet que implementa el fallback de websockets con
+ *         AJAX polling
  */
 @WebServlet(urlPatterns = "/tuitfallback")
 public class FallBackServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private HashMap<String, ConcurrentLinkedQueue<StatusPOJO>> usrBuffer = new HashMap<String, ConcurrentLinkedQueue<StatusPOJO>>();
+	private HashMap<String, ConcurrentLinkedQueue<String>> statusBuffer = new HashMap<String, ConcurrentLinkedQueue<String>>();
 	private Queue<TwitterStream> twitterPool = new ConcurrentLinkedQueue<TwitterStream>();
 	private final static String OAuthConsumerKey = "391LQjJbx84o2Je2Zx9YA";
 	private final static String OAuthConsumerSecret = "BYf3UdA9EwpV8K4qmjEyZHAaZVIJZlH5qciNaMg";
@@ -44,10 +43,7 @@ public class FallBackServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		String user = req.getParameter("user");
-		long previousRequest = getRequestTimestamp(req, "previousRequest");
-		long currentRequest = getRequestTimestamp(req, "currentRequest");
-
-		resp.getWriter().write(getTuits(previousRequest, currentRequest, user));
+		resp.getWriter().write(getTuits(user));
 
 	}
 
@@ -62,6 +58,7 @@ public class FallBackServlet extends HttpServlet {
 
 			if (req.getParameter("stop") != null) {
 
+				statusBuffer.remove(user);
 				for (TwitterStream t : twitterPool) {
 					if (user.equals(t.getScreenName()))
 						t.shutdown();
@@ -77,12 +74,13 @@ public class FallBackServlet extends HttpServlet {
 
 				twitter.setOAuthConsumer(OAuthConsumerKey, OAuthConsumerSecret);
 				twitter.setOAuthAccessToken(at);
-				StatusAdapterFallback statusR = new StatusAdapterFallback(filter, user);
+				StatusAdapterFallback statusR = new StatusAdapterFallback(
+						filter, user);
 				twitter.addListener(statusR);
 				FilterQuery query = new FilterQuery();
 				query.track(new String[] { filter });
 				twitter.filter(query);
-				usrBuffer.put(user, new ConcurrentLinkedQueue<StatusPOJO>());
+				statusBuffer.put(user, new ConcurrentLinkedQueue<String>());
 				twitterPool.add(twitter);
 			}
 
@@ -95,63 +93,16 @@ public class FallBackServlet extends HttpServlet {
 		}
 	}
 
-	private class StatusPOJO {
-		public long timestamp;
-		public String status;
-
-		public StatusPOJO(String s) {
-			this.status = s;
-			this.timestamp = System.currentTimeMillis();
-		}
-	}
-
-	private String getTuits(long minTimestamp, long maxTimestamp, String user) {
+	private String getTuits(String user) {
 		JSONArray res = new JSONArray();
 
-		ConcurrentLinkedQueue<StatusPOJO> echoBufferFIFO = usrBuffer.get(user);
-		for (StatusPOJO msg : echoBufferFIFO) {
-
-			// System.out.println("for msg fifo min"+minTimestamp +"  nuestro"+
-			// msg.timestamp+ " max"+maxTimestamp);
-			// System.out.println(msg.timestamp > minTimestamp);
-			// System.out.println(msg.timestamp <= maxTimestamp);
-			// if (minTimestamp > -1 && msg.timestamp > minTimestamp
-			// && msg.timestamp <= maxTimestamp) {
-			res.put(msg.status);
+		ConcurrentLinkedQueue<String> echoBufferFIFO = statusBuffer.get(user);
+		for (String msg : echoBufferFIFO) {
+			res.put(msg);
 			echoBufferFIFO.remove(msg);
-			// }
 		}
 
 		return res.toString();
-	}
-
-	private long getRequestTimestamp(HttpServletRequest req,
-			String parameterName) {
-		String parameter = getQueryMap(req.getQueryString()).get(parameterName);
-
-		long timestamp = -1;
-		try {
-			timestamp = Long.parseLong(parameter);
-		} catch (NumberFormatException e) {
-		}
-		;
-
-		return timestamp;
-	}
-
-	private Map<String, String> getQueryMap(String queryString) {
-		Map<String, String> map = new HashMap<String, String>();
-
-		if (queryString == null)
-			return map;
-
-		String[] params = queryString.split("&");
-		for (String param : params) {
-			String name = param.split("=")[0];
-			String value = param.split("=")[1];
-			map.put(name, value);
-		}
-		return map;
 	}
 
 	private class StatusAdapterFallback extends StatusAdapter {
@@ -168,9 +119,8 @@ public class FallBackServlet extends HttpServlet {
 		public void onStatus(Status status) {
 
 			String tweet = DataObjectFactory.getRawJSON(status);
-			ConcurrentLinkedQueue<StatusPOJO> echoBufferFIFO = usrBuffer
-					.get(user);
-			echoBufferFIFO.add(new StatusPOJO(tweet));
+			ConcurrentLinkedQueue<String> echoBufferFIFO = statusBuffer.get(user);
+			echoBufferFIFO.add(tweet);
 
 			try {
 				MongoDao.getInstance().addTuit(tweet, filter);
