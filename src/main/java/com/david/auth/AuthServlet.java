@@ -13,6 +13,10 @@ import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.RequestToken;
 
+/**
+ * @author david.sanchez
+ *Crea un request token para la aplicación y se dirige a Twitter para la autorización del usuario
+ */
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
 

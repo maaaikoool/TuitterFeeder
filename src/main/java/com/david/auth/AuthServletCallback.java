@@ -16,6 +16,10 @@ import twitter4j.TwitterStream;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
+/**
+ * @author david.sanchez
+ * Callback de la autorización de Twitter. Generamos un AccesToken y lo guardamos en MongoDB
+ */
 @WebServlet("/back")
 public class AuthServletCallback extends HttpServlet {
 

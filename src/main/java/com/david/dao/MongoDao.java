@@ -3,7 +3,6 @@ package com.david.dao;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import twitter4j.auth.AccessToken;
 import twitter4j.internal.org.json.JSONArray;
@@ -14,7 +13,12 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
+import com.mongodb.util.JSON;
 
+/**
+ * @author david.sanchez
+ * DAO de MongoDB
+ */
 public class MongoDao {
 
 	private Mongo connection = null;
@@ -22,6 +26,15 @@ public class MongoDao {
 	private static final String dbName = "tuiter";
 	private static final String collectionTuit = "tuit";
 	private static final String collectionUser = "users";
+	private static final String tuitID = "id_str";
+	private static final String tuitCreatedAt = "created_at";
+	private static final String tuitFavorito = "favorito";
+	private static final String tuitFilter = "filter";
+	private static final String userScreenName = "screenName";
+	private static final String userID = "userId";
+	private static final String userToken = "token";
+	private static final String userTokenSecret = "tokenSecret";
+	
 
 	public DB getDb() {
 		return db;
@@ -51,16 +64,6 @@ public class MongoDao {
 		return mongoDao;
 	}
 
-	// This is how you create a table in the mongoDB
-	public void createTable(String tableName) throws DaoException {
-		// If tableName doesn’t exist create it
-		Set tableNames = db.getCollectionNames();
-		if (!tableNames.contains(tableName)) {
-			DBObject dbobject = new BasicDBObject();
-			db.createCollection(tableName, dbobject);
-		}
-	}
-
 	/*
 	 * This is how you insert a record in the database Every record is a
 	 * DBObject which is a map type where a key is the column name and value is
@@ -72,75 +75,26 @@ public class MongoDao {
 		dbCollection.insert(dbObject);
 	}
 
-	// This is how you can retrieve all the table names
-	public Set getTableNames() throws DaoException {
-		return db.getCollectionNames();
-	}
-
-	// This is how you can retrieve all the rows in the table
-	public void showDB(String tableName) throws DaoException {
-		DBCollection dbCollection = db.getCollection(tableName);
-		DBCursor cur = dbCollection.find();
-		while (cur.hasNext()) {
-			System.out.println(cur.next());
-		}
-	}
-
-	public DBCursor getAllRows(String tableName) throws DaoException {
-		DBCollection dbCollection = db.getCollection(tableName);
-		DBCursor cur = dbCollection.find();
-		return cur;
-	}
-
-	// Below code shows how you could get the row count
-	public int getRowCount(String tableName) throws DaoException {
-		DBCollection dbCollection = db.getCollection(tableName);
-		DBCursor cur = dbCollection.find();
-		return cur.count();
-	}
-
-	// Below code shows how to filter the data using where clause. A where
-	// clause is a BasicDBObject type with key as the filter column name and the
-	// value is the filter value.
-	public DBCursor findByColumn(String tableName, DBObject whereClause)
-			throws DaoException {
-		DBCursor result = null;
-		DBCollection dbCollection = db.getCollection(tableName);
-		result = dbCollection.find(whereClause);
-		return result;
-	}
-
-	public void createIndex(String tableName, String columnName)
-			throws DaoException {
-		DBCollection dbCollection = db.getCollection(tableName);
-		DBObject indexData = new BasicDBObject(columnName, 1);
-		dbCollection.createIndex(indexData);
-	}
-
-	public void dropTable(String collectionName) {
-		db.getCollection(collectionName).drop();
-	}
-
 	public String addFavoritos(String user, String id) throws DaoException {
 		DBCollection col = db.getCollection(collectionTuit);
-		BasicDBObject query = new BasicDBObject("id_str", id);
+		BasicDBObject query = new BasicDBObject(tuitID, id);
 		DBCursor cursor = col.find(query);
 		DBObject nuevo = null;
 		if (cursor.hasNext()) {
 			nuevo = cursor.next();
 		} else {
-			throw new DaoException("no encontrado " + id);
+			throw new DaoException("Tuit encontrado " + id);
 		}
-		nuevo.put("favorito", user);
+		nuevo.put(tuitFavorito, user);
 		col.update(query, nuevo);
 		return nuevo.toString();
 	}
 
 	public String getFavoritos(String user) {
 		DBCollection col = db.getCollection(collectionTuit);
-		BasicDBObject old = new BasicDBObject("favorito", user);
+		BasicDBObject old = new BasicDBObject(tuitFavorito, user);
 		DBCursor cursor = col.find(old)
-				.sort(new BasicDBObject("created_at", 1));
+				.sort(new BasicDBObject(tuitCreatedAt, 1));
 		List<String> res = new ArrayList<>();
 		while (cursor.hasNext()) {
 			DBObject tuit = cursor.next();
@@ -152,47 +106,38 @@ public class MongoDao {
 
 	public void addUser(AccessToken at) throws DaoException {
 		BasicDBObject db = new BasicDBObject();
-		db.put("screenName", at.getScreenName());
-		db.put("token", at.getToken());
-		db.put("tokenSecret", at.getTokenSecret());
-		db.put("userId", at.getUserId());
+		db.put(userScreenName, at.getScreenName());
+		db.put(userToken, at.getToken());
+		db.put(userTokenSecret, at.getTokenSecret());
+		db.put(userID, at.getUserId());
 		saveToDB(collectionUser, db);
 	}
 
 	public AccessToken getUser(String screenName) throws DaoException {
 		DBCollection col = db.getCollection(collectionUser);
 
-		BasicDBObject db = new BasicDBObject("screenName", screenName);
+		BasicDBObject db = new BasicDBObject(userScreenName, screenName);
 		DBCursor cursor = col.find(db);
 		if (cursor.hasNext()) {
 			DBObject user = cursor.next();
-			AccessToken at = new AccessToken(user.get("token").toString(), user
-					.get("tokenSecret").toString(), (long) user.get("userId"));
+			AccessToken at = new AccessToken(user.get(userToken).toString(), user
+					.get(userTokenSecret).toString(), (long) user.get(userID));
 			return at;
 		} else
 			return null;
 
 	}
-
-	public void saveTuitToDB(DBObject tuitDB) throws DaoException {
-		saveToDB(collectionTuit, tuitDB);
-
+	
+	public void addTuit(String tuit, String filter) throws DaoException
+	{
+		DBObject tuitDB = (DBObject) JSON.parse(tuit);
+		tuitDB.put(tuitFilter, filter);
+		saveTuitToDB(tuitDB);
 	}
 
-	public String getLastTtuit(String user, String timeStamp) {
-		DBCollection col = db.getCollection(collectionTuit);
-		BasicDBObject query = new BasicDBObject("filterBy", user);
-		query.put("created_at", new BasicDBObject("$gt", timeStamp));
-		
-		DBCursor cursor = col.find(query);
-		List<String> res = new ArrayList<>();
-		while (cursor.hasNext()) {
-			DBObject tuit = cursor.next();
-			res.add(tuit.toString());
-		}
-		JSONArray jArray = new JSONArray(res);
-		return jArray.toString();
-		
+	private void saveTuitToDB(DBObject tuitDB) throws DaoException {
+		saveToDB(collectionTuit, tuitDB);
+
 	}
 
 }

@@ -5,9 +5,6 @@ function addFavoritos(tuitID) {
 		contentType : 'application/json;',
 		url : 'http://' + location.host + '/TuitterFeeder/rest/favoritos/add/' 
 				 + $("#username").val() +'/' + tuitID ,
-		success : function(msg) {
-			console.log('success');
-		},
 		error : function(xhr, ajaxOptions, thrownError) {
 			console.log(xhr.status);
 			console.log(thrownError);
@@ -29,7 +26,7 @@ function listFavoritos() {
 				$.each(data, function(key, val) {
 					
 					var jsonResp = $.parseJSON(data[key]);
-					printTuit(jsonResp,true);
+					printTuit(jsonResp);
 					
 				});
 

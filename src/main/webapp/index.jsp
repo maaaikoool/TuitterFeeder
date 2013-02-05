@@ -9,7 +9,7 @@
 <title>Tuitter Feeder</title>
 <meta name="description" content="Twitter Feeder">
 <meta name="author" content="david">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
 <link rel="stylesheet" href="css/bootstrap.min.css?v=1.0">
 <link href="css/bootstrap-responsive.min.css" rel="stylesheet"> 
 </head>
@@ -44,7 +44,7 @@
 		
 		<div class="row" style="text-align:center">
 			<input type="text" class="input-medium search-query" id="filter">
-			<button class="btn" id="buttonSC" onclick="wsclient.connect()">Start</button>
+			<button class="btn btn-success" id="buttonSC" onclick="wsclient.connect()">Start</button>
 
 			<div class="btn-group">
 			  <a class="btn btn-primary" href="#"><i class="icon-user icon-white"></i><%=at.getScreenName()%></a>
@@ -67,26 +67,21 @@
 %>
 
 
-
 <br>
 
 <div id=content class="container">
-
-	
-	
 </div> <!-- end container -->
+
+<script type="text/javascript">
+$('#filter').change(function() {
+	$('#content').empty();
+	});
+</script>
+
 </section>
 <!-- End of Main content area -->
 <!-- Sidebar -->
 <aside>
-	<!-- Sidebar 
-	<section>
-		<ul>
-			<li>tuit1</li>
-			<li>tuit2</li>
-		</ul>
-	</section>
-	-->
 </aside>
 <!-- End Sidebar -->
 <!-- Footer -->

@@ -6,9 +6,11 @@ var wsclient = (function() {
 
 		var options = { 
 				fallbackSendURL : 'http://' + location.host + '/TuitterFeeder/tuitfallback',
-				fallbackPollURL : 'http://' + location.host + '/TuitterFeeder/tuitfallback'
-				
+				fallbackPollURL : 'http://' + location.host + '/TuitterFeeder/tuitfallback',
+				fallbackPollParams : {}
 		};
+		
+		options.fallbackPollParams.user=$("#username").val();
 		var wsURI = 'ws://' + location.host + '/TuitterFeeder/tuit?filter=' + $("#filter").val()
 				+ '&user='+ $("#username").val()+"'";
 		ws = $.gracefulWebSocket(wsURI,options);
@@ -17,6 +19,8 @@ var wsclient = (function() {
 		ws.onopen = function() {
 			$("#buttonSC").attr('onclick', 'wsclient.disconnect()');
 			$("#buttonSC").html('Stop');
+			$("#buttonSC").toggleClass("btn-danger btn-success");
+			$("#filter").prop('disabled', true);
 			
 			var opt = {}
 			opt.user = $("#username").val();
@@ -24,8 +28,6 @@ var wsclient = (function() {
 			ws.send(opt);
 		};
 		ws.onmessage = function(evt) {
-			
-			console.log("on message "+evt.data);
 			if(evt.data.length > 0)
 			{
 				writeToScreen(evt.data);
@@ -33,12 +35,19 @@ var wsclient = (function() {
 		};
 
 		ws.onclose = function() {
+
+		    $("#buttonSC").attr('onclick', 'wsclient.connect()');
+			$("#buttonSC").html('Start');
+			$("#buttonSC").toggleClass("btn-success btn-danger");
+			$("#filter").prop('disabled', false);
+			
 			var opt = {}
 			opt.user = $("#username").val();
 			opt.stop = "true";
-			ws.send(opt);
-		    $("#buttonSC").attr('onclick', 'wsclient.connect()');
-			$("#buttonSC").html('Start');
+			if(ws != null)
+			{
+				ws.send(opt);
+			}
 		};
 		
 		ws.onerror = function(evt) {
@@ -51,15 +60,14 @@ var wsclient = (function() {
 			
 			if(jsonResp.id_str != undefined) // Es un tuit (1 json)
 			{
-				printTuit(jsonResp,false);
+				printTuit(jsonResp);
 			}
 			
 			else // es un array de tuits
 			{
 				$.each(jsonResp, function(key, val) {
-					console.log(jsonResp)
 					var aux = $.parseJSON(jsonResp[key]);
-					printTuit(aux,false);
+					printTuit(aux);
 				});
 			}
 			
